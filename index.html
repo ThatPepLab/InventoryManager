@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071b38">
+  <title>That Pep Lab Inventory Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <section id="loginView" class="login-view">
+    <div class="login-card">
+      <div class="eyebrow">THAT PEP LAB</div>
+      <h1>Inventory Manager</h1>
+      <p>Private stock controls for sold items, restocks, incoming shipments, and history.</p>
+      <form id="loginForm">
+        <label for="password">Manager password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="primary wide" type="submit">Open Manager</button>
+      </form>
+      <p id="setupMessage" class="setup-message" hidden></p>
+    </div>
+  </section>
+
+  <div id="appView" hidden>
+    <header class="app-header">
+      <div>
+        <div class="eyebrow">THAT PEP LAB</div>
+        <h1>Inventory Manager</h1>
+      </div>
+      <div class="header-actions">
+        <button id="refreshButton" class="secondary">Refresh</button>
+        <button id="logoutButton" class="ghost">Lock</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="summary" class="summary-grid" aria-label="Inventory summary"></section>
+
+      <section class="toolbar card">
+        <label class="search-wrap" for="searchInput">
+          <span>Search product, strength, or SKU</span>
+          <input id="searchInput" type="search" placeholder="Start typing…" autocomplete="off">
+        </label>
+        <div id="filters" class="filters" role="group" aria-label="Inventory filters">
+          <button class="filter active" data-filter="all">All</button>
+          <button class="filter" data-filter="low">Low</button>
+          <button class="filter" data-filter="out">Out</button>
+          <button class="filter" data-filter="incoming">On the way</button>
+        </div>
+      </section>
+
+      <section class="section-heading">
+        <div>
+          <h2>Products</h2>
+          <p id="resultCount"></p>
+        </div>
+        <button id="addProductButton" class="primary">+ Add product</button>
+      </section>
+      <section id="productGrid" class="product-grid"></section>
+
+      <section class="section-heading history-heading">
+        <div>
+          <h2>Recent activity</h2>
+          <p>Every quantity change includes a date and time.</p>
+        </div>
+        <button id="undoButton" class="secondary">Undo last change</button>
+      </section>
+      <section id="historyList" class="history-list card"></section>
+    </main>
+  </div>
+
+  <dialog id="itemDialog">
+    <form id="itemForm" method="dialog">
+      <div class="dialog-head">
+        <div>
+          <div class="eyebrow">INVENTORY ITEM</div>
+          <h2 id="dialogTitle">Edit product</h2>
+        </div>
+        <button type="button" class="icon-button" data-close aria-label="Close">×</button>
+      </div>
+      <input id="itemId" type="hidden">
+      <div class="form-grid">
+        <label>Product name<input id="productName" required></label>
+        <label>Strength<input id="productStrength" placeholder="Example: 10mg" required></label>
+        <label>SKU (optional)<input id="productSku" placeholder="Example: RT10"></label>
+        <label>Category<input id="productCategory" placeholder="Example: Weight Loss"></label>
+        <label>Current quantity<input id="productQuantity" type="number" min="0" step="1" required></label>
+      </div>
+      <fieldset class="incoming-box">
+        <label class="toggle-row"><input id="moreOnWay" type="checkbox"><span>More on the way</span></label>
+        <div id="incomingFields" class="form-grid compact" hidden>
+          <label>Incoming quantity<input id="incomingQuantity" type="number" min="1" step="1"></label>
+          <label>Expected arrival<input id="expectedArrival" type="date"></label>
+        </div>
+      </fieldset>
+      <div class="dialog-actions">
+        <button type="button" class="ghost" data-close>Cancel</button>
+        <button class="primary" value="save" type="submit">Save product</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="adjustDialog">
+    <form id="adjustForm" method="dialog">
+      <div class="dialog-head">
+        <div><div class="eyebrow">CUSTOM ADJUSTMENT</div><h2 id="adjustTitle">Adjust stock</h2></div>
+        <button type="button" class="icon-button" data-close aria-label="Close">×</button>
+      </div>
+      <input id="adjustId" type="hidden">
+      <label>Change in quantity
+        <input id="adjustDelta" type="number" step="1" placeholder="Use -2 or 5" required>
+      </label>
+      <label>Note (optional)<input id="adjustNote" placeholder="Reason for adjustment"></label>
+      <div class="dialog-actions">
+        <button type="button" class="ghost" data-close>Cancel</button>
+        <button class="primary" value="save" type="submit">Apply adjustment</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
