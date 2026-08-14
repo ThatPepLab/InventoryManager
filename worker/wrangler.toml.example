@@ -1,0 +1,15 @@
+name = "thatpeplab-inventory-api"
+main = "src/index.js"
+compatibility_date = "2026-08-14"
+
+[vars]
+GITHUB_OWNER = "ThatPepLab"
+GITHUB_REPO = "InStock"
+GITHUB_BRANCH = "main"
+INVENTORY_PATH = "inventory.json"
+HISTORY_PATH = "manager-history.json"
+ALLOWED_ORIGINS = "https://thatpeplab.github.io"
+
+# Add these as encrypted Worker secrets, never as plain text here:
+# wrangler secret put GITHUB_TOKEN
+# wrangler secret put MANAGER_PASSWORD
