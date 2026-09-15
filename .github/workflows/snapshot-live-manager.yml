@@ -1,0 +1,55 @@
+name: Snapshot Live Inventory Manager UI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download live manager shell and assets
+        run: |
+          set -e
+          rm -rf live-site-snapshot
+          mkdir -p live-site-snapshot/assets
+          BASE="https://tpl-inventory-api.anthonyperezabo.chatgpt.site"
+          curl -fsSL "$BASE/" -o live-site-snapshot/index.html
+          python - <<'PY'
+          import re, pathlib, urllib.request, urllib.parse
+          root=pathlib.Path('live-site-snapshot')
+          html=(root/'index.html').read_text(errors='ignore')
+          refs=[]
+          for pattern in [r'<script[^>]+src=["\']([^"\']+)', r'<link[^>]+href=["\']([^"\']+)']:
+              refs += re.findall(pattern, html, flags=re.I)
+          base='https://tpl-inventory-api.anthonyperezabo.chatgpt.site/'
+          for ref in sorted(set(refs)):
+              if ref.startswith('data:') or ref.startswith('http') and 'tpl-inventory-api.anthonyperezabo.chatgpt.site' not in ref:
+                  continue
+              url=urllib.parse.urljoin(base, ref)
+              name=ref.split('?',1)[0].lstrip('/') or 'asset'
+              dest=root/name
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as r:
+                      dest.write_bytes(r.read())
+                  print('saved', ref)
+              except Exception as e:
+                  print('skip', ref, e)
+          PY
+      - name: Commit snapshot when changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add live-site-snapshot
+          if git diff --cached --quiet; then
+            echo "No snapshot changes"
+            exit 0
+          fi
+          git commit -m "Snapshot live Inventory Manager UI"
+          git push
