@@ -48,7 +48,7 @@ function normalizeItems(items) {
     ...raw,
     id:itemId(raw), product:String(raw.product||"").trim(), strength:String(raw.strength||"").trim(),
     sku:String(raw.sku||"").trim(), category:String(raw.category||"").trim(), quantity:Math.max(0,Math.trunc(Number(raw.quantity)||0)),
-    moreOnWay:Boolean(raw.moreOnWay), incomingQuantity:Math.max(0,Math.trunc(Number(raw.incomingQuantity)||0)), expectedArrival:String(raw.expectedArrival||"")
+    internalOnly:Boolean(raw.internalOnly), moreOnWay:Boolean(raw.moreOnWay), incomingQuantity:Math.max(0,Math.trunc(Number(raw.incomingQuantity)||0)), expectedArrival:String(raw.expectedArrival||"")
   })).sort((a,b)=>a.product.localeCompare(b.product)||a.strength.localeCompare(b.strength,undefined,{numeric:true}));
 }
 
