@@ -82,6 +82,13 @@ async function handle(env, request) {
     const amount=Math.max(0,Math.trunc(Number(before.incomingQuantity)||0)); if(!before.moreOnWay||!amount)throw new Error("No incoming quantity is set");
     items[i]={...before,quantity:before.quantity+amount,moreOnWay:false,incomingQuantity:0,expectedArrival:"",updatedAt:now()};
     record=entry(items[i],"receive","Shipment received",amount,`Expected arrival was ${before.expectedArrival||"not set"}`,before,items[i]); message=`Received ${amount} for ${items[i].product}`;
+  } else if(action==="remove"){
+    const i=items.findIndex(x=>x.id===input.id); if(i<0)throw new Error("Product not found"); const before={...items[i]};
+    if(before.quantity>0)throw new Error("Set the quantity to 0 before removing this item");
+    if(before.moreOnWay)throw new Error("Cancel or receive the incoming shipment before removing this item");
+    items.splice(i,1);
+    record=entry(before,"remove","Removed from active inventory",0,"No reorder planned",before,null,false);
+    message=`${before.product} ${before.strength} removed from active inventory`;
   } else if(action==="undo"){
     const target=history.find(x=>x.undoable&&!x.undone); if(!target)throw new Error("There is no change to undo"); const i=items.findIndex(x=>x.id===target.itemId); if(i<0||!target.before)throw new Error("The last change cannot be undone");
     const current={...items[i]}; items[i]={...target.before,updatedAt:now()}; target.undone=true; target.undoneAt=now();
