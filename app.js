@@ -44,7 +44,8 @@
 
   function statusFor(item) {
     const quantity=Number(item.quantity || 0);
-    if (quantity <= 0 && item.moreOnWay) return ["On The Way", "incoming"];
+    if (quantity <= 0 && item.moreOnWay && item.expectedArrival) return ["On The Way", "incoming"];
+    if (quantity <= 0 && item.moreOnWay) return ["Coming Soon", "incoming"];
     if (quantity <= 0) return ["Request", "out"];
     if (quantity === 1) return ["Only 1 Left", "low"];
     return ["In Stock", "in"];
@@ -149,7 +150,7 @@
 
   $("itemForm").addEventListener("submit", async e => {
     e.preventDefault(); const incoming=$("moreOnWay").checked;
-    if(incoming && (!Number($("incomingQuantity").value) || !$("expectedArrival").value)){toast("Enter incoming quantity and expected arrival.",true); return;}
+    if(incoming && Number($("incomingQuantity").value)<0){toast("Incoming quantity cannot be negative.",true); return;}
     try { const product=$("productName").value.trim(),strength=$("productStrength").value.trim(),catalog=catalogOptionFor(product,strength),internalOnly=Boolean(catalog?.internalOnly)||/^oil based$/i.test($("productCategory").value.trim())||/pill|tablet/i.test($("productCategory").value.trim()); await mutate("save",{ item:{id:$("itemId").value||undefined,product,strength,sku:$("productSku").value.trim(),category:$("productCategory").value.trim()||(catalog?.category||""),quantity:Number($("productQuantity").value),internalOnly,moreOnWay:incoming,incomingQuantity:incoming?Number($("incomingQuantity").value):0,expectedArrival:incoming?$("expectedArrival").value:""} }); $("itemDialog").close(); }
     catch(error){toast(error.message,true)}
   });
