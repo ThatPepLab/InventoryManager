@@ -43,8 +43,10 @@
   }
 
   function statusFor(item) {
-    if (Number(item.quantity) <= 0) return ["Out of Stock", "out"];
-    if (Number(item.quantity) === 1) return ["Only 1 Left", "low"];
+    const quantity=Number(item.quantity || 0);
+    if (quantity <= 0 && item.moreOnWay) return ["On The Way", "incoming"];
+    if (quantity <= 0) return ["Request", "out"];
+    if (quantity === 1) return ["Only 1 Left", "low"];
     return ["In Stock", "in"];
   }
 
@@ -85,6 +87,7 @@
           <button class="restock" data-action="restock">+1 Restock</button>
           ${item.moreOnWay ? `<button data-action="receive">Receive</button>` : `<button data-action="adjust">Adjust</button>`}
           <button data-action="edit">Edit</button>
+          ${Number(item.quantity || 0) <= 0 && !item.moreOnWay ? `<button class="remove-item" data-action="remove">Remove</button>` : ""}
         </div>
       </article>`;
     }).join("") : `<div class="empty card">No products match this view.</div>`;
@@ -136,6 +139,11 @@
       if(button.dataset.action==="receive") { if(confirm(`Receive ${item.incomingQuantity || 0} incoming units for ${item.product} ${item.strength}?`)) await mutate("receive",{id:item.id}); }
       if(button.dataset.action==="edit") openItem(item);
       if(button.dataset.action==="adjust") { $("adjustId").value=item.id; $("adjustTitle").textContent=`Adjust ${item.product} ${item.strength}`; $("adjustDelta").value=""; $("adjustNote").value=""; $("adjustDialog").showModal(); }
+      if(button.dataset.action==="remove") {
+        if(Number(item.quantity || 0)>0){toast("Set the quantity to 0 before removing this item.",true);return;}
+        if(item.moreOnWay){toast("Receive or cancel the incoming shipment before removing this item.",true);return;}
+        if(confirm(`Remove ${item.product} ${item.strength} from active inventory? It will stop appearing on Retail.`)) await mutate("remove",{id:item.id});
+      }
     } catch(error){toast(error.message,true)}
   });
 
